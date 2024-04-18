@@ -123,7 +123,7 @@ for sequence in sequences:
     dll_nrmse = calculate_nrmse(sequence, dll_imputed_sequence)
 
                                                                                                                 # Open output file
-    with open('output.txt', 'w') as f:
+    with open('output.txt', 'a+') as f:
                                                                                                                 # Write NRMSE to file
         f.write(f"\nNRMSE for sequence:\n{sequence}\n")
         f.write(f"KNN Imputation: {knn_nrmse}\n")
@@ -158,6 +158,8 @@ for sequence in sequences:
         f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")                             # Write percentage of difference to file
         f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")                                  # Write precentage of smiliarty to file
 
+        f.write("\nDifference Table for LLS Imputation:\n")
+        f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
