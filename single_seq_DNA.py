@@ -1,4 +1,5 @@
 import time
+import time
 
 """
 CSC571 Data Mining
@@ -101,34 +102,49 @@ for sequence in sequences:
     missing_sequence = generate_missing_sequence(sequence, missing_percentage)
 
                                                                                                                 # KNN imputation
+    start_time = time.time_ns()
     knn_imputed_sequence = KNNimpute_single_sequence(missing_sequence, k=5)
+    end_time = time.time_ns()
+    knn_cpu_time = (end_time - start_time) / 1000
 
-                                                                                                                # LLSimpute
+    start_time = time.time_ns()
     lls_imputed_sequence = LLSimpute_single_sequence(missing_sequence, neighborhood_size=5)
+    end_time = time.time_ns()
+    lls_cpu_time = (end_time - start_time) / 1000
 
-                                                                                                                # DLLSimpute
+    start_time = time.time_ns()
     dll_imputed_sequence = DLLSimpute_single_sequence(missing_sequence, max_neighborhood_size=5)
+    end_time = time.time_ns()
+    dll_cpu_time = (end_time - start_time) / 1000
 
-                                                                                                                # Calculate NRMSE
+    # Calculate NRMSE
     knn_nrmse = calculate_nrmse(sequence, knn_imputed_sequence)
     lls_nrmse = calculate_nrmse(sequence, lls_imputed_sequence)
     dll_nrmse = calculate_nrmse(sequence, dll_imputed_sequence)
 
-                                                                                                                # Open output file
+    # Open output file
     with open('output.txt', 'w') as f:
-                                                                                                                # Write NRMSE to file
+        # Write NRMSE to file
         f.write(f"\nNRMSE for sequence:\n{sequence}\n")
         f.write(f"KNN Imputation: {knn_nrmse}\n")
         f.write(f"LLSimpute: {lls_nrmse}\n")
         f.write(f"DLLSimpute: {dll_nrmse}\n")
 
-                                                                                                                # Write difference table - KNN to file
+        # Write CPU time to file
+        f.write(f"\nCPU Time:\n")
+        f.write(f"KNN Imputation: {knn_cpu_time} microseconds\n")
+        f.write(f"LLSimpute: {lls_cpu_time} microseconds\n")
+        f.write(f"DLLSimpute: {dll_cpu_time} microseconds\n")
+
+        # Write missing percentage to file
+        f.write(f"\nMissing Percentage: {missing_percentage * 100}%\n")
+
+        # Write difference table - KNN to file
         f.write("\nDifference Table for KNN Imputation:\n")
         f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        start_time = time.time_ns()
         for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, knn_imputed_sequence)):
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
@@ -136,22 +152,15 @@ for sequence in sequences:
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        end_time = time.time_ns()
-        cpu_time = (end_time - start_time) / 1000
         f.write(f"\nTotal: {len(sequence)}\n")
         f.write(f"Different: {diff_count}\n")
         f.write(f"Same: {same_count}\n")
         f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
         f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"CPU Time: {cpu_time} microseconds\n")
 
-                                                                                                                # Write difference table - LLS to file
-        f.write("\nDifference Table for LLSimpute:\n")
-        f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        start_time = time.time_ns()
         for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, lls_imputed_sequence)):
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
@@ -159,22 +168,18 @@ for sequence in sequences:
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        end_time = time.time_ns()
-        cpu_time = (end_time - start_time) / 1000
         f.write(f"\nTotal: {len(sequence)}\n")
         f.write(f"Different: {diff_count}\n")
         f.write(f"Same: {same_count}\n")
         f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
         f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"CPU Time: {cpu_time} microseconds\n")
 
-                                                                                                                # Write difference table - DLLS to file
+        # Write difference table - DLLS to file
         f.write("\nDifference Table for DLLSimpute:\n")
         f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        start_time = time.time_ns()
         for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, dll_imputed_sequence)):
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
@@ -182,11 +187,8 @@ for sequence in sequences:
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        end_time = time.time_ns()
-        cpu_time = (end_time - start_time) / 1000
         f.write(f"\nTotal: {len(sequence)}\n")
         f.write(f"Different: {diff_count}\n")
         f.write(f"Same: {same_count}\n")
         f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
         f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"CPU Time: {cpu_time} microseconds\n")
