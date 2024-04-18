@@ -102,93 +102,93 @@ for sequence in sequences:
     missing_sequence = generate_missing_sequence(sequence, missing_percentage)
 
                                                                                                                 # KNN imputation
-    start_time = time.time_ns()
-    knn_imputed_sequence = KNNimpute_single_sequence(missing_sequence, k=5)
-    end_time = time.time_ns()
-    knn_cpu_time = (end_time - start_time) / 1000
+    start_time = time.time_ns()                                                                                 # Start time
+    knn_imputed_sequence = KNNimpute_single_sequence(missing_sequence, k=5)                                     # Impute missing values using K-Nearest Neighbors
+    end_time = time.time_ns()                                                                                   # End time
+    knn_cpu_time = (end_time - start_time) / 1000                                                               # Calculate CPU time
 
-    start_time = time.time_ns()
-    lls_imputed_sequence = LLSimpute_single_sequence(missing_sequence, neighborhood_size=5)
-    end_time = time.time_ns()
-    lls_cpu_time = (end_time - start_time) / 1000
+    start_time = time.time_ns()                                                                                 # Start time
+    lls_imputed_sequence = LLSimpute_single_sequence(missing_sequence, neighborhood_size=5)                     # Impute missing values using Local Least Squares
+    end_time = time.time_ns()                                                                                   # End time
+    lls_cpu_time = (end_time - start_time) / 1000                                                               # Calculate CPU time
 
-    start_time = time.time_ns()
-    dll_imputed_sequence = DLLSimpute_single_sequence(missing_sequence, max_neighborhood_size=5)
-    end_time = time.time_ns()
-    dll_cpu_time = (end_time - start_time) / 1000
+    start_time = time.time_ns()                                                                                 # Start time
+    dll_imputed_sequence = DLLSimpute_single_sequence(missing_sequence, max_neighborhood_size=5)                # Impute missing values using Dynamic Local Least Squares
+    end_time = time.time_ns()                                                                                   # End time
+    dll_cpu_time = (end_time - start_time) / 1000                                                               # Calculate CPU time
 
-    # Calculate NRMSE
+                                                                                                                # Calculate NRMSE
     knn_nrmse = calculate_nrmse(sequence, knn_imputed_sequence)
     lls_nrmse = calculate_nrmse(sequence, lls_imputed_sequence)
     dll_nrmse = calculate_nrmse(sequence, dll_imputed_sequence)
 
-    # Open output file
+                                                                                                                # Open output file
     with open('output.txt', 'w') as f:
-        # Write NRMSE to file
+                                                                                                                # Write NRMSE to file
         f.write(f"\nNRMSE for sequence:\n{sequence}\n")
         f.write(f"KNN Imputation: {knn_nrmse}\n")
         f.write(f"LLSimpute: {lls_nrmse}\n")
         f.write(f"DLLSimpute: {dll_nrmse}\n")
 
-        # Write CPU time to file
+                                                                                                                # Write CPU time to file
         f.write(f"\nCPU Time:\n")
         f.write(f"KNN Imputation: {knn_cpu_time} microseconds\n")
         f.write(f"LLSimpute: {lls_cpu_time} microseconds\n")
         f.write(f"DLLSimpute: {dll_cpu_time} microseconds\n")
 
-        # Write missing percentage to file
+                                                                                                                # Write missing percentage to file
         f.write(f"\nMissing Percentage: {missing_percentage * 100}%\n")
 
-        # Write difference table - KNN to file
+                                                                                                                # Write difference table - KNN to file
         f.write("\nDifference Table for KNN Imputation:\n")
         f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, knn_imputed_sequence)):
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, knn_imputed_sequence)):     # Write difference table - KNN to file
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
                 diff_count += 1
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        f.write(f"\nTotal: {len(sequence)}\n")
-        f.write(f"Different: {diff_count}\n")
-        f.write(f"Same: {same_count}\n")
-        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"\nTotal: {len(sequence)}\n")                                                                  # Write total amount to file
+        f.write(f"Different: {diff_count}\n")                                                                   # Write amout of 'same to file
+        f.write(f"Same: {same_count}\n")                                                                        # Write count of 'different' to file
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")                             # Write percentage of difference to file
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")                                  # Write precentage of smiliarty to file
 
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, lls_imputed_sequence)):
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, lls_imputed_sequence)):     # Write difference table - LLS to file
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
                 diff_count += 1
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        f.write(f"\nTotal: {len(sequence)}\n")
-        f.write(f"Different: {diff_count}\n")
-        f.write(f"Same: {same_count}\n")
-        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"\nTotal: {len(sequence)}\n")                                                                  # Write total amount to file
+        f.write(f"Different: {diff_count}\n")                                                                   # Write count of 'different' to file
+        f.write(f"Same: {same_count}\n")                                                                        # Write count of 'same to file
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")                             # Write percentage of 'different' to file
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")                                  # Write precentage of 'same' to file
 
-        # Write difference table - DLLS to file
+                                                                                                                # Write difference table - DLLS to file
         f.write("\nDifference Table for DLLSimpute:\n")
         f.write("Position | Original | Imputed | Difference\n")
         f.write("-------------------------------------------\n")
         diff_count = 0
         same_count = 0
-        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, dll_imputed_sequence)):
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, dll_imputed_sequence)):     # Write difference table - DLLS to file
             if original_nucleotide != imputed_nucleotide:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
                 diff_count += 1
             else:
                 f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
                 same_count += 1
-        f.write(f"\nTotal: {len(sequence)}\n")
-        f.write(f"Different: {diff_count}\n")
-        f.write(f"Same: {same_count}\n")
-        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
-        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"\nTotal: {len(sequence)}\n")                                                                  # Write Total to file
+        f.write(f"Different: {diff_count}\n")                                                                   # Write difference count to file
+        f.write(f"Same: {same_count}\n")                                                                        # Write same count to file
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")                             # Write percentage different to file
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")                                  # Write percentage same to file
