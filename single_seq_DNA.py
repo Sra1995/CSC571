@@ -1,3 +1,5 @@
+import time
+
 """
 CSC571 Data Mining
 Project 1
@@ -87,7 +89,7 @@ def print_difference_table(original_sequence, imputed_sequence):                
         else:                                                                                                   # If the nucleotides are the same
             print(f"{i+1:8} | {original_nucleotide:8} | {imputed_nucleotide:7} | {'Same':10}")                  # Print the position, original nucleotide, imputed nucleotide, and 'Same'
 
-# Sample DNA sequences selected from chimpanzee.txt
+                                                                                                                # Sample DNA sequences selected from chimpanzee.txt
 sequences = [
     "ATGCCCCAACTAAATACCGCCGTATGACCCACCATAATTACCCCCATACTCCTGACACTATTTCTCGTCACCCAACTAAAAATATTAAATTCAAATTACCATCTACCCCCCTCACCAAAACCCATAAAAATAAAAAACTACAATAAACCCTGAGAACCAAAATGAACGAAAATCTATTCGCTTCATTCGCTGCCCCCACAATCCTAG",
     "ATGGCCTCGCGCTGGTGGCGGTGGCGACGCGGCTGCTCCTGGAGGCCGGCGGCGCGGAGCTCCGGGCCCGGCTCCCCAGGCCGTGCGGGACCGTCGGGGCCGAGCGCCGCTGCCGACGTCCGCGCGCAGGTTCATAGGCGGAAGGGACTTGACTTGTCTCAGATACCCTATATTAATCTTGTGAAGCATTTAACATCTGCCTGTCCAAATGTATGTCGTATATCACGGTTTCATCACACAACCCCAGACAGTAAAACACACAGTGGTGAAAAATACACCGATCCTTTCAAACTCGGTTGGAGAGACTTGAAAGGTCTGTATGAGGACATTAGAAAGGAACTGCTTATATCAACATCAGAACTTAAGGAAATGTCTGAGTACTACTTTGATGGGAAAGGGAAAGCCTTTCGACCAATTATTGTGGCGCTAATGGCCCGAGCATGCAATATTCATCATAACAACTCCCGACATGTGCAAGCCAGCCAGCGCACCATAGCCTTAATTGCAGAAATGATCCACACTGCTAGTCTGGTTCACGATGACGTTATTGACGATGCAAGTTCTCGAAGAGGAAAACACACAGTTAATAAGATCTGGGGTGAAAAGAAGGCTGTTCTTGCTGGAGATTTAATTCTTTCTGCAGCATCTATAGCTCTGGCACGAATTGGAAATACAACTGTTATATCTATTTTAACCCAAGTTATTGAAGATTTGGTGCGTGGTGAATTTCTTCAGCTCGGGTCAAAAGAAAATGAGAATGAAAGATTTGCACACTACCTTGAGAAGACGTTCAAGAAGACCGCCAGCCTGATAGCCAACAGTTGTAAAGCAGTCTCTGTTCTAGGATGTCCCGACCCAGTGGTGCATGAGATCGCCTATCAGTACGGAAAAAATGTAGGAATAGCTTTTCAGCTTATAGATGATGTATTGGACTTCACCTCATGTTCTGACCAGATGGGCAAACCAACATCAGCTGATCTGAAGCTCGGGTTAGCCACTGGTCCTGTCCTGTTTGCCTGTCAGCAGTTCCCAGAAATGAATGCTATGATCATGCGACGGTTCAGTTTGCCGGGAGATGTAGACAGAGCTCGACAGTATGTATTACAGAGTGATGGTGTGCAACAAACAACCTACCTCGCCCAGCAGTACTGCCATGAAGCAATAAGAGAGATCAGTAAACTTCGACCATCCCCAGAAAGAGATGCCCTCATTCAGCTTTCAGAAATTGTACTCACAAGAGATAAATGA"
@@ -112,31 +114,79 @@ for sequence in sequences:
     lls_nrmse = calculate_nrmse(sequence, lls_imputed_sequence)
     dll_nrmse = calculate_nrmse(sequence, dll_imputed_sequence)
 
-                                                                                                                # Print NRMSE
-    print(f"\nNRMSE for sequence:\n{sequence}")
-    print(f"KNN Imputation: {knn_nrmse}")
-    print(f"LLSimpute: {lls_nrmse}")
-    print(f"DLLSimpute: {dll_nrmse}")
-                                                                                                                # Print difference table - KNN
-    print("\nDifference Table for KNN Imputation:")
-    print_difference_table(sequence, knn_imputed_sequence)
-    num_different_knn = sum(1 for original_nucleotide, imputed_nucleotide in zip(sequence, knn_imputed_sequence) if original_nucleotide != imputed_nucleotide)
-    num_same_knn = len(sequence) - num_different_knn
-    print(f"Number of Different: {num_different_knn}")
-    print(f"Number of Same: {num_same_knn}")
+                                                                                                                # Open output file
+    with open('output.txt', 'w') as f:
+                                                                                                                # Write NRMSE to file
+        f.write(f"\nNRMSE for sequence:\n{sequence}\n")
+        f.write(f"KNN Imputation: {knn_nrmse}\n")
+        f.write(f"LLSimpute: {lls_nrmse}\n")
+        f.write(f"DLLSimpute: {dll_nrmse}\n")
 
-                                                                                                                # Print difference table - LLS
-    print("\nDifference Table for LLSimpute:")
-    print_difference_table(sequence, lls_imputed_sequence)
-    num_different_lls = sum(1 for original_nucleotide, imputed_nucleotide in zip(sequence, lls_imputed_sequence) if original_nucleotide != imputed_nucleotide)
-    num_same_lls = len(sequence) - num_different_lls
-    print(f"Number of Different: {num_different_lls}")
-    print(f"Number of Same: {num_same_lls}")
+                                                                                                                # Write difference table - KNN to file
+        f.write("\nDifference Table for KNN Imputation:\n")
+        f.write("Position | Original | Imputed | Difference\n")
+        f.write("-------------------------------------------\n")
+        diff_count = 0
+        same_count = 0
+        start_time = time.time_ns()
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, knn_imputed_sequence)):
+            if original_nucleotide != imputed_nucleotide:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
+                diff_count += 1
+            else:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
+                same_count += 1
+        end_time = time.time_ns()
+        cpu_time = (end_time - start_time) / 1000
+        f.write(f"\nTotal: {len(sequence)}\n")
+        f.write(f"Different: {diff_count}\n")
+        f.write(f"Same: {same_count}\n")
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"CPU Time: {cpu_time} microseconds\n")
 
-                                                                                                                # Print difference table - DLLS
-    print("\nDifference Table for DLLSimpute:")
-    print_difference_table(sequence, dll_imputed_sequence)
-    num_different_dll = sum(1 for original_nucleotide, imputed_nucleotide in zip(sequence, dll_imputed_sequence) if original_nucleotide != imputed_nucleotide)
-    num_same_dll = len(sequence) - num_different_dll
-    print(f"Number of Different: {num_different_dll}")
-    print(f"Number of Same: {num_same_dll}")
+                                                                                                                # Write difference table - LLS to file
+        f.write("\nDifference Table for LLSimpute:\n")
+        f.write("Position | Original | Imputed | Difference\n")
+        f.write("-------------------------------------------\n")
+        diff_count = 0
+        same_count = 0
+        start_time = time.time_ns()
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, lls_imputed_sequence)):
+            if original_nucleotide != imputed_nucleotide:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
+                diff_count += 1
+            else:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
+                same_count += 1
+        end_time = time.time_ns()
+        cpu_time = (end_time - start_time) / 1000
+        f.write(f"\nTotal: {len(sequence)}\n")
+        f.write(f"Different: {diff_count}\n")
+        f.write(f"Same: {same_count}\n")
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"CPU Time: {cpu_time} microseconds\n")
+
+                                                                                                                # Write difference table - DLLS to file
+        f.write("\nDifference Table for DLLSimpute:\n")
+        f.write("Position | Original | Imputed | Difference\n")
+        f.write("-------------------------------------------\n")
+        diff_count = 0
+        same_count = 0
+        start_time = time.time_ns()
+        for i, (original_nucleotide, imputed_nucleotide) in enumerate(zip(sequence, dll_imputed_sequence)):
+            if original_nucleotide != imputed_nucleotide:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tDifferent\n")
+                diff_count += 1
+            else:
+                f.write(f"{i+1}\t{original_nucleotide}\t{imputed_nucleotide}\tSame\n")
+                same_count += 1
+        end_time = time.time_ns()
+        cpu_time = (end_time - start_time) / 1000
+        f.write(f"\nTotal: {len(sequence)}\n")
+        f.write(f"Different: {diff_count}\n")
+        f.write(f"Same: {same_count}\n")
+        f.write(f"Percentage Different: {diff_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"Percentage Same: {same_count / len(sequence) * 100:.2f}%\n")
+        f.write(f"CPU Time: {cpu_time} microseconds\n")
